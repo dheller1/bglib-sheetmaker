@@ -1,7 +1,13 @@
 #:import argv sys.argv
 <SlotFrame>:
-    is_selected: False
+    is_selected: False  # for ToggleButtonBehavior
+
+    drag_rectangle: self.x, self.y, self.width, self.height
+    drag_timeout: 1000  # ms
+
+    # drawing
     opacity: .7 if self.is_selected else .4
+
     canvas:
         Color:
             rgba: .08, .8, .8, .9

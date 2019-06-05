@@ -8,7 +8,7 @@ import kivy.uix.image
 from kivy.uix.label import Label
 import kivy.uix.scatter
 from kivy.uix.widget import Widget
-from kivy.uix.behaviors import ToggleButtonBehavior
+from kivy.uix.behaviors import ToggleButtonBehavior, DragBehavior
 import kivy.app
 from kivy.core.window import Window
 from kivy.graphics import Color
@@ -98,7 +98,7 @@ class SheetImage(kivy.uix.image.Image):
             b.points = (rleft, rbottom, rright, rbottom)
 
 
-class SlotFrame(ToggleButtonBehavior, Widget):
+class SlotFrame(DragBehavior, ToggleButtonBehavior, Widget):
     is_selected = BooleanProperty(False)
 
     def on_state(self, _, value):
