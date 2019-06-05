@@ -1,0 +1,44 @@
+#:import argv sys.argv
+<SlotFrame>:
+    canvas:
+        Color:
+            rgba: .1, .9, .9, .4
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+    canvas.after:
+        Color:
+            rgba: .1, .9, .9, 1
+        Line:  # top
+            points: [self.x, self.top, self.right, self.top]
+        Line:  # left
+            points: [self.x, self.y, self.x, self.top]
+        Line:  # btm
+            points: [self.x, self.y, self.right, self.y]
+        Line:  # right
+            points: [self.right, self.y, self.right, self.top]
+
+
+<LabelListView>:
+    viewclass: 'Label'
+    RecycleBoxLayout:
+        default_size: None, dp(56)
+        default_size_hint: 1, None
+        size_hint_y: None
+        height: self.minimum_height
+        orientation: 'vertical'
+
+
+RootWidget:
+    BoxLayout:
+        size: root.size
+
+        LabelListView:
+            size_hint_x: .15
+            id: label_list
+
+        SheetImage:
+            source: argv[1]
+            allow_stretch: True
+            slot_list: label_list
