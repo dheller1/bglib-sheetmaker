@@ -8,11 +8,12 @@ import kivy.uix.image
 from kivy.uix.label import Label
 import kivy.uix.scatter
 from kivy.uix.widget import Widget
+from kivy.uix.behaviors import ToggleButtonBehavior
 import kivy.app
 from kivy.core.window import Window
 from kivy.graphics import Color
 from kivy.uix.recycleview import RecycleView
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, BooleanProperty
 import logging
 import os
 import sys
@@ -75,7 +76,6 @@ class SheetImage(kivy.uix.image.Image):
             if self.slot_list:
                 self.slot_list.data.append({'text':str(SlotFrame)})
 
-            print(self.children)
         super().on_touch_up(event)
 
     def on_touch_move(self, event):
@@ -98,8 +98,11 @@ class SheetImage(kivy.uix.image.Image):
             b.points = (rleft, rbottom, rright, rbottom)
 
 
-class SlotFrame(Widget):
-    pass
+class SlotFrame(ToggleButtonBehavior, Widget):
+    is_selected = BooleanProperty(False)
+
+    def on_state(self, _, value):
+        self.is_selected = (value == 'down')
 
 
 """class Toolbar(kivy.uix.boxlayout.BoxLayout):

@@ -1,15 +1,17 @@
 #:import argv sys.argv
 <SlotFrame>:
+    is_selected: False
+    opacity: .7 if self.is_selected else .4
     canvas:
         Color:
-            rgba: .1, .9, .9, .4
+            rgba: .08, .8, .8, .9
         Rectangle:
             size: self.size
             pos: self.pos
 
     canvas.after:
         Color:
-            rgba: .1, .9, .9, 1
+            rgba: .2, 1, 1, 1
         Line:  # top
             points: [self.x, self.top, self.right, self.top]
         Line:  # left
