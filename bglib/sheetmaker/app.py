@@ -14,6 +14,7 @@ from kivy.core.window import Window
 from kivy.graphics import Color
 from kivy.uix.recycleview import RecycleView
 from kivy.properties import ObjectProperty, BooleanProperty
+from bglib.sheetmaker.behaviors import ResizableBehavior
 import logging
 import os
 import sys
@@ -96,7 +97,8 @@ class SheetImage(kivy.uix.image.Image, KeyboardListenerMixin):
                 top = Line(points=list(event.pos), width=1)
                 btm = Line(points=list(event.pos), width=1)
                 event.ud['borders'] = left, right, top, btm
-        super().on_touch_down(event)
+            return False
+        return super().on_touch_down(event)
 
     def on_touch_up(self, event):
         rect = event.ud.get('new_rect')
@@ -131,9 +133,15 @@ class SheetImage(kivy.uix.image.Image, KeyboardListenerMixin):
             t.points = (rleft, rtop, rright, rtop)
             b.points = (rleft, rbottom, rright, rbottom)
 
+        for c in self.children:
+            c.on_touch_move(event)
 
-class SlotFrame(DragBehavior, ToggleButtonBehavior, Widget):
+
+class SlotFrame(ResizableBehavior, DragBehavior, ToggleButtonBehavior, Widget):
     is_selected = BooleanProperty(False)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     def on_state(self, _, value):
         self.is_selected = (value == 'down')

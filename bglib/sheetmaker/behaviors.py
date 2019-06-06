@@ -33,6 +33,8 @@ class ResizableBehavior:
         l, r, t, b = self.x - tol, self.right + tol, self.top + tol, self.y - tol
         return l <= x <= r and b <= y <= t
 
+    # FIXME: This seems to only ever work for a single instance - once multiple exist, only the last one receives the
+    # callback ... might need some distribution instance?
     def on_mouse_pos(self, *args):
         if self.is_resizing:
             return  # careful not to abort the operation we're currently in
