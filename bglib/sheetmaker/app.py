@@ -12,6 +12,7 @@ from kivy.uix.behaviors import ToggleButtonBehavior, DragBehavior
 import kivy.app
 from kivy.core.window import Window
 from kivy.graphics import Color
+from kivy.uix.relativelayout import RelativeLayout
 from kivy.uix.recycleview import RecycleView
 from kivy.properties import ObjectProperty, BooleanProperty
 from bglib.sheetmaker.behaviors import ResizableBehavior
@@ -24,12 +25,6 @@ from kivy.graphics import Rectangle, Line
 
 ScrollDown = 'scrolldown'
 ScrollUp = 'scrollup'
-
-
-class SheetmakerModel:
-    def __init__(self):
-        self.slots = []
-
 
 
 def midpoint(pos1, pos2):
@@ -74,6 +69,10 @@ class SheetImage(kivy.uix.image.Image, KeyboardListenerMixin):
 
     slot_list = ObjectProperty(None)
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.bind(norm_image_size=self.on_image_size_changed)
+
     @property
     def selection(self):
         return [c for c in self.children if isinstance(c, SlotFrame) and c.is_selected]
@@ -82,6 +81,10 @@ class SheetImage(kivy.uix.image.Image, KeyboardListenerMixin):
         if keycode[1] == 'delete':
             print('Removing', self.selection)
             self.clear_widgets(self.selection)
+
+    def on_image_size_changed(self, *args):
+        for c in self.children:
+            c.update_abssize_from_rel()
 
     def on_touch_down(self, event):
         if 'ctrl' in Window.modifiers and self.collide_point(*event.pos):
@@ -142,11 +145,36 @@ class SlotFrame(ResizableBehavior, DragBehavior, ToggleButtonBehavior, Widget):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        self.relpos, self.relsize = None, None
+        self.bind(parent=self.update_relsize_from_abs)  # update relsize when parent is set
+
+    def _get_parent_margins(self):
+        assert self.parent
+        marginleft = max(0.5 * (self.parent.size[0] - self.parent.norm_image_size[0]), 0)
+        marginbtm = max(0.5 * (self.parent.size[1] - self.parent.norm_image_size[1]), 0)
+        return marginleft, marginbtm
 
     def on_state(self, _, value):
         self.is_selected = (value == 'down')
         print('current selection', self.parent.selection)
 
+    def update_relsize_from_abs(self, *_):
+        marginleft, marginbtm = self._get_parent_margins()
+
+        # self coordinates always relate to parent size, not image size - transform them to image size by
+        # subtracting margins and dividing by image size
+        self.relpos = ((self.x - marginleft) / self.parent.norm_image_size[0],
+                       (self.y - marginbtm) / self.parent.norm_image_size[1])
+
+        self.relsize = self.width / self.parent.norm_image_size[0], self.height / self.parent.norm_image_size[1]
+
+    def update_abssize_from_rel(self):
+        marginleft, marginbtm = self._get_parent_margins()
+
+        # add margins to pos before setting it
+        self.pos = (marginleft + self.relpos[0] * self.parent.norm_image_size[0],
+                    marginbtm + self.relpos[1] * self.parent.norm_image_size[1])
+        self.size = self.relsize[0] * self.parent.norm_image_size[0], self.relsize[1] * self.parent.norm_image_size[1]
 
 """class Toolbar(kivy.uix.boxlayout.BoxLayout):
     def __init__(self):
@@ -163,7 +191,6 @@ class RootWidget(Widget):
 class SheetmakerApp(kivy.app.App):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.model = SheetmakerModel()
 
 
 if __name__ == '__main__':
